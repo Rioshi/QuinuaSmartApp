@@ -3,7 +3,7 @@
 
 library(water)
 library(RStoolbox)
-setwd("~/Documentos/Quinua_Smart_App")
+setwd("C:/Users/ULima/Documents/Proyectos_R_Carlos/ET_remote_sensing")
 #Delimitacion area de interes "aoi"
 
 aoi <- createAoi(topleft = c(456600,-1310000), 
