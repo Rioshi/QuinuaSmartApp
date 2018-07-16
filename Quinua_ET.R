@@ -36,6 +36,8 @@ dem <- raster("MDE/s12_w076_1arc_v3.tif")
 dem <- projectRaster(dem,crs=crs(imageL8))
 dem <- crop(x=dem,y=aoi)
 dem <- resample(dem, imageL8$B, method="bilinear")
+origin(dem)
+origin(imageL8)
 #All coefficients
 surface.model <-METRICtopo(dem)
 solar.angles.r <- solarAngles(surface.model = surface.model, 
