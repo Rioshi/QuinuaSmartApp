@@ -6,11 +6,19 @@ library(RStoolbox)
 setwd("C:/Users/ULima/Documents/Proyectos_R_Carlos/ET_remote_sensing")
 #Delimitacion area de interes "aoi"
 
-#aoi <- createAoi(topleft = c(456600,-1310000), 
-#                 bottomright = c(459200,-1312400), EPSG = 32618)
+aoi <- createAoi(topleft = c(439432,-1293748), 
+                 bottomright = c(504827,-1351046), EPSG = 32618)
+#drawExtent() para demarcar un area en el mapa
 
-aoi <- createAoi(topleft = c(408885,-1395315), 
-                 bottomright = c(637515,-1162785), EPSG = 32618)
+###Ubicaciones estaciones
+est <- read.csv("Meteorologia/estaciones.csv",header = TRUE)
+coordinates(est) = ~X+Y
+proj4string(est) <- CRS("+proj=utm +zone=18 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+est <- spTransform(est, crs(imageL8)) #imageL8 esta mas adelante
+#plot(imageL8$B)
+#plot(est,add=TRUE)
+#plot(aoi,add=TRUE)
+###############################################################
 
 #Lectura de datos estacion meteorologica
 csvfile <- read.csv("Meteorologia/IRD_sierra.csv",
@@ -35,11 +43,12 @@ plot(WeatherStation,hourly=TRUE) #sat=FALSE,date=...
 #Carga de imagenes satelitales
 imageL8 <- loadImage(path = "Landsat/Example2/DN", sat = "L8",aoi)
 imageL8 <- crop(imageL8,aoi)
-
+#plot(imageL8)
 ###Cargar MDE
 #checkSRTMgrids(imageL8)
-dem <- raster("MDE/s12_w076_1arc_v3.tif")
-dem <- projectRaster(dem,crs=crs(imageL8))
+dem <- raster("MDE/MDE_mosaic.tif")
+#dem <- projectRaster(dem,crs=crs(imageL8))
+#plot(dem,add=TRUE)
 dem <- crop(x=dem,y=aoi)
 dem <- resample(dem, imageL8$B, method="bilinear")
 origin(dem)
@@ -66,29 +75,31 @@ plot(imageL8$B, col = "grey")
 plot(dem, add = TRUE)
 
 #Momentum Roughness Length
-lai <- LAI(method = "turner",image=image.SR,aoi = aoi)
+lai <- LAI(method = "metric2010",image=image.TOAr,aoi = aoi)
 ndvi <- (image.SR$NIR - image.SR$R)/(image.SR$NIR + image.SR$R)
 alb <- albedo(image.SR, aoi, coeff="Olmedo",sat="L8")
 
 mom <- momentumRoughnessLength(method = "short.crops",LAI = lai,NDVI=ndvi,albedo = alb,
                                mountainous = TRUE,surface.model = surface.model)
-
-wpoint <- SpatialPoints(coords = WeatherStation$location[1,1:2])
-proj4string(wpoint) <- CRS("+proj=longlat +datum=WGS84")
-wpoint <- spTransform(wpoint, crs(mom))
-extract(x=mom,y=wpoint)
+rm(lai)
+rm(ndvi)
+rm(alb)
+#wpoint <- SpatialPoints(coords = est@coords[8,])
+#WeatherStation$location[1,1:2]
+#proj4string(wpoint) <- CRS("+proj=utm +zone=18 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+#wpoint <- spTransform(wpoint, crs(imageL8))
+#extract(x=imageL8,y=wpoint)
+#extract(x=mom,y=est[8,])
 
 #Energy Balance
 Energy.Balance <- METRIC.EB(image.DN = imageL8,image.SR = image.SR,
                             plain = FALSE, DEM=dem,
-                            aoi = aoi, n=5, WeatherStation = WeatherStation,
+                            aoi = aoi, n=2, WeatherStation = WeatherStation,
                             ETp.coef = 1,sat = "L8",alb.coeff = "Olmedo",LST.method = "SW",
-                            LAI.method = "turner",Zom.method = "short.crops", Z.om.ws = 0.03,MTL=MTLfile)
+                            LAI.method = "metric2010", 
+                            Z.om.ws = extract(x=mom,y=est[8,]),
+                            MTL=MTLfile)
 
-
-
-
-extract(x=projectRaster(mom2,crs=crs("+proj=longlat +datum=WGS84")),y=matrix(data=WeatherStation$location[,1:2],nrow = 1,ncol = 2))
 
 plot(Energy.Balance)
 
@@ -98,11 +109,21 @@ ET.24 <- ET24h(Rn = Energy.Balance$EB$NetRadiation, G=Energy.Balance$EB$SoilHeat
                H = Energy.Balance$EB$SensibleHeat, Ts=Energy.Balance$EB$surfaceTemperature, 
                WeatherStation = WeatherStation, ETr.daily=ET_WS)
 
-###Ubicaciones estaciones
-est <- read.csv("Meteorologia/estaciones.csv",header = TRUE)
-proj4string(est) <- CRS("+proj=utm +zone=18 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-est <- spTransform(est, crs(imageL8))
-coordinates(est) = ~X+Y
-plot(est)
-plot(imageL8$B)
-plot(est,add=TRUE)
+
+writeRaster(ET.24$layer,filename = "Resultados/ET1.tif",format="GTiff",overwrite=TRUE)
+
+#Calibrar el metodo
+extract(x=ET.24,y=est@coords)
+
+#library(Evapotranspiration)
+huayta <- read.csv("Meteorologia/huaytapallana.csv",
+                    header = TRUE,na.strings=c("NA"))
+
+Mest2 <-  read.WSdata(WSdata = huayta, date.format = '%d/%m/%Y',
+                      time.format='%H:%M:%S',lat=-11.92666667, long= -75.06166667, elev=4684, height= 2.2,
+                      columns=c("date" = 1, "time" = 2, "radiation" = 9,
+                                "wind" = 3, "RH" = 8, "temp" = 5, "rain" = 7), 
+                      cf=c(1,1,1),
+                      MTL = MTLfile,
+                      tz="America/Lima")
+plot(Mest2)
