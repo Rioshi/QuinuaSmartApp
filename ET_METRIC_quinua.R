@@ -2,7 +2,7 @@ library(water)
 library(RStoolbox)
 library(doParallel)
 library(foreach)
-setwd("E:/QuinuaSmartApp")
+setwd("D:/QuinuaSmartApp")
 
 #Lectura de datos estacion meteorologica
 csvfile <- read.csv("ET_remote_sensing/Meteorologia/IRD_sierra.csv",
@@ -20,14 +20,17 @@ aoi <- createAoi(topleft = c(435929,-1269644),
 #####################################
 ##LECTURA DE LANDSAT
 #####################################
-#####Lectura de MTL landsat 8 12-sept
-MTLfile <- "Articulo_ET/Landsat/DN/12-sep-2017/LC08_L1TP_006068_20170823_20170912_01_T1/LC08_L1TP_006068_20170823_20170912_01_T1_MTL.txt"
-#####Lectura de MTL landsat 8 13-Ago
-MTLfile <- "Articulo_ET/Landsat/DN/13-ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1/LC08_L1TP_006068_20170807_20170813_01_T1_MTL.txt"
-#####Lectura de MTL landsat 8 28-julio
-MTLfile <- "Articulo_ET/Landsat/DN/28-jul-2017/LC08_L1TP_006068_20170722_20170728_01_T1/LC08_L1TP_006068_20170722_20170728_01_T1_MTL.txt"
-#####Lectura de MTL landsat 8 16-junio
-MTLfile <- "Articulo_ET/Landsat/DN/16-junio-2017/LC08_L1TP_006068_20170604_20170616_01_T1/LC08_L1TP_006068_20170604_20170616_01_T1_MTL.txt"
+#####Lectura de MTL landsat 8 || 04-jun
+MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1/LC08_L1TP_006068_20170604_20170616_01_T1_MTL.txt"
+#####Lectura de MTL landsat 8 || 07-ago
+MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/07-Ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1/LC08_L1TP_006068_20170807_20170813_01_T1_MTL.txt"
+#####Lectura de MTL landsat 8 || 22-jul
+MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/22-Jul-2017/LC08_L1TP_006068_20170722_20170728_01_T1_MTL.txt"
+#####Lectura de MTL landsat 8 || 23-ago
+MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/23-Ago-2017/LC08_L1TP_006068_20170823_20170912_01_T1/LC08_L1TP_006068_20170823_20170912_01_T1_MTL.txt"
+#####Lectura de MTL landsat 8 || 26-oct
+MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/26-Oct-2017/LC08_L1TP_006068_20171026_20171107_01_T1/LC08_L1TP_006068_20171026_20171107_01_T1_MTL.txt"
+
 
 
 #Lectura y graficado de datos meteorologicos
@@ -39,26 +42,28 @@ WeatherStation <- read.WSdata(WSdata = csvfile, date.format = '%d/%m/%Y',
                               MTL = MTLfile,
                               tz="America/Lima")
 #Cargar imagen
-imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/12-sep-2017/LC08_L1TP_006068_20170823_20170912_01_T1", sat = "L8",aoi)
-imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/13-ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1", sat = "L8",aoi)
-imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/28-jul-2017/LC08_L1TP_006068_20170722_20170728_01_T1", sat = "L8",aoi)
-imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/16-junio-2017/LC08_L1TP_006068_20170604_20170616_01_T1", sat = "L8",aoi)
+imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1", sat = "L8",aoi)
+imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/07-Ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1", sat = "L8",aoi)
+imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/22-Jul-2017", sat = "L8",aoi)
+imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/23-Ago-2017/LC08_L1TP_006068_20170823_20170912_01_T1", sat = "L8",aoi)
+imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/26-Oct-2017/LC08_L1TP_006068_20171026_20171107_01_T1", sat = "L8",aoi)
 
 
 image.SR <- loadImageSR(
-  path="Articulo_ET/Landsat/Reflectancia/12-sep-2017/LC080060682017082301T1-SC20180714004437",
+  path="Articulo_ET/Landsat/Reflectancia/04-jun-2017/LC080060682017060401T1-SC20181107130021",
   aoi=aoi)
 image.SR <- loadImageSR(
-  path="Articulo_ET/Landsat/Reflectancia/13-ago-2017/LC080060682017080701T1-SC20180714004416",
+  path="Articulo_ET/Landsat/Reflectancia/07-ago-2017/LC080060682017080701T1-SC20181107125749",
   aoi=aoi)
 image.SR <- loadImageSR(
-  path="Articulo_ET/Landsat/Reflectancia/28-jul-2017/LC080060682017072201T1-SC20180714004431",
+  path="Articulo_ET/Landsat/Reflectancia/22-jul-2017/LC080060682017072201T1-SC20181107130005",
+  aoi=aoi)
+image.SR <- loadImageSR(
+  path="Articulo_ET/Landsat/Reflectancia/23-ago-2017/LC080060682017082301T1-SC20181107125734",
   aoi=aoi)
 image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/16-jun-2017/LC080060682017060401T1-SC20180714004355",
   aoi=aoi)
-
-
 
 
 values(imageL8)[values(imageL8) == 0] = NA
