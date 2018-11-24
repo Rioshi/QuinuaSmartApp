@@ -65,6 +65,13 @@ image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/16-jun-2017/LC080060682017060401T1-SC20180714004355",
   aoi=aoi)
 
+############CORTAR NUBESS
+cmsk = cloudMask(imageL8, threshold = .4, blue = 1, tir = 8)
+wocl = mask(imageL8, cmsk$CMASK, maskvalue = NA)
+plot(wocl$R)
+
+
+
 
 values(imageL8)[values(imageL8) == 0] = NA
 
