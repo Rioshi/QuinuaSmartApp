@@ -4,6 +4,7 @@ library(doParallel)
 library(foreach)
 setwd("D:/QuinuaSmartApp")
 
+
 #Lectura de datos estacion meteorologica
 csvfile <- read.csv("ET_remote_sensing/Meteorologia/IRD_sierra.csv",
                     header = TRUE,na.strings=c("---"))
@@ -21,15 +22,15 @@ aoi <- createAoi(topleft = c(435929,-1269644),
 ##LECTURA DE LANDSAT
 #####################################
 #####Lectura de MTL landsat 8 || 04-jun
-MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1/LC08_L1TP_006068_20170604_20170616_01_T1_MTL.txt"
+MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1/LC08_L1TP_006068_20170604_20170616_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 07-ago
-MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/07-Ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1/LC08_L1TP_006068_20170807_20170813_01_T1_MTL.txt"
+MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/07-Ago-2017/LC08_L1TP_006068_20170807_20170813_01_T1/LC08_L1TP_006068_20170807_20170813_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 22-jul
-MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/22-Jul-2017/LC08_L1TP_006068_20170722_20170728_01_T1_MTL.txt"
+MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/22-Jul-2017/LC08_L1TP_006068_20170722_20170728_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 23-ago
-MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/23-Ago-2017/LC08_L1TP_006068_20170823_20170912_01_T1/LC08_L1TP_006068_20170823_20170912_01_T1_MTL.txt"
+MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/23-Ago-2017/LC08_L1TP_006068_20170823_20170912_01_T1/LC08_L1TP_006068_20170823_20170912_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 26-oct
-MTLfile <- "file:///D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/26-Oct-2017/LC08_L1TP_006068_20171026_20171107_01_T1/LC08_L1TP_006068_20171026_20171107_01_T1_MTL.txt"
+MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/26-Oct-2017/LC08_L1TP_006068_20171026_20171107_01_T1/LC08_L1TP_006068_20171026_20171107_01_T1_MTL.txt"
 
 
 
@@ -62,18 +63,23 @@ image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/23-ago-2017/LC080060682017082301T1-SC20181107125734",
   aoi=aoi)
 image.SR <- loadImageSR(
-  path="Articulo_ET/Landsat/Reflectancia/16-jun-2017/LC080060682017060401T1-SC20180714004355",
+  path="Articulo_ET/Landsat/Reflectancia/26-Oct-2017",
   aoi=aoi)
 
 ############CORTAR NUBESS
-cmsk = cloudMask(imageL8, threshold = .4, blue = 1, tir = 8)
-wocl = mask(imageL8, cmsk$CMASK, maskvalue = NA)
-plot(wocl$R)
 
+ 
 
-
-
+cmsk <- cloudMask(imageL8, threshold = .4, blue = 1, tir = 8)
+imageL8 <- mask(imageL8, cmsk$CMASK, maskvalue = 1)
+image.SR <- mask(image.SR, cmsk$CMASK, maskvalue = 1)
 values(imageL8)[values(imageL8) == 0] = NA
+values(image.SR)[values(image.SR) == 0] = NA
+
+
+
+
+
 
 #Cargar todas las estaciones
 est <- read.csv("ET_remote_sensing/Meteorologia/estaciones.csv",header = TRUE)
@@ -120,11 +126,12 @@ Energy.Balance <- METRIC.EB(image.DN = imageL8,image.SR = image.SR,
                             plain = FALSE, DEM=dem,
                             aoi = aoi, n=2, WeatherStation = WeatherStation,
                             ETp.coef = 1,sat = "L8",alb.coeff = "Olmedo",LST.method = "SW",
-                            LAI.method = "metric2010",anchors.method = "random", 
+                            LAI.method = "metric2010",anchors.method = "flexible", 
                             Z.om.ws = extract(x=mom,y=est[7,]),
                             MTL=MTLfile)
 end_time <- Sys.time()
 end_time - start_time
+
 
 
 
@@ -135,22 +142,28 @@ ET.24 <- ET24h(Rn = Energy.Balance$EB$NetRadiation, G=Energy.Balance$EB$SoilHeat
 extract(x=ET.24,y=est@coords)
 
 
-writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/et_12_sep.tif",format="GTiff",overwrite=TRUE)
-writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/et_13_ago.tif",format="GTiff",overwrite=TRUE)
-writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/et_28_jul.tif",format="GTiff",overwrite=TRUE)
-writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/et_16_junio.tif",format="GTiff",overwrite=TRUE)
+writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/04_jun.tif",format="GTiff",overwrite=TRUE)
+writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/07_ago.tif",format="GTiff",overwrite=TRUE)
+writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/22_jul.tif",format="GTiff",overwrite=TRUE)
+writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/23_ago.tif",format="GTiff",overwrite=TRUE)
+writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/26_oct.tif",format="GTiff",overwrite=TRUE)
 
 ##Extraer datos de ETa
-et.12.sep <- raster("Articulo_ET/Rasters/ET_METRIC/et_12_sep.tif")
-et.13.ago <-raster("Articulo_ET/Rasters/ET_METRIC/et_13_ago.tif")
-et.28.jul <- raster("Articulo_ET/Rasters/ET_METRIC/et_28_jul.tif")
-et.16.jun <- raster("Articulo_ET/Rasters/ET_METRIC/et_16_junio.tif")
+et.04.jun <- raster("Articulo_ET/Rasters/ET_METRIC/04_jun.tif")
+et.07.ago <-raster("Articulo_ET/Rasters/ET_METRIC/07_ago.tif")
+et.22.jul <- raster("Articulo_ET/Rasters/ET_METRIC/22_jul.tif")
+et.23.ago <- raster("Articulo_ET/Rasters/ET_METRIC/23_ago.tif")
+et.26.oct <- raster("Articulo_ET/Rasters/ET_METRIC/26_oct.tif")
+
+
 
 nombr <- est@data$Estacion
-sep.12 <- extract(x=et.12.sep,y=est@coords)
-ago.13 <- extract(x=et.13.ago,y=est@coords)
-jul.28 <- extract(x=et.28.jul,y=est@coords)
-jun.16 <- extract(x=et.16.jun,y=est@coords)
+jun.04 <- extract(x=et.04.jun,y=est@coords)
+ago.07 <- extract(x=et.07.ago,y=est@coords)
+jul.22 <- extract(x=et.22.jul,y=est@coords)
+ago.23 <- extract(x=et.23.ago,y=est@coords)
+oct.26 <- extract(x=et.26.oct,y=est@coords)
+
 
 todo <- data.frame(nombr,sep.12,ago.13,jul.28,jun.16)
 write.csv(todo,file="C:/Users/USER/Desktop/GianCarlo/todo.csv")
