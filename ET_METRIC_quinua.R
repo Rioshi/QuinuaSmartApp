@@ -165,5 +165,5 @@ ago.23 <- extract(x=et.23.ago,y=est@coords)
 oct.26 <- extract(x=et.26.oct,y=est@coords)
 
 
-todo <- data.frame(nombr,sep.12,ago.13,jul.28,jun.16)
-write.csv(todo,file="C:/Users/USER/Desktop/GianCarlo/todo.csv")
+todo <- data.frame(nombr,jun.04,ago.07,jul.22,ago.23,oct.26)
+write.csv(todo,file="C:/Users/Carlos/Documents/Provicional/met.csv")

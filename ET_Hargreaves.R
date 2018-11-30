@@ -33,7 +33,7 @@ ETo <- 0.0023 * (avgTemp + 17.8) *
 meteoro["ETo"] <- ETo
 meteoro$Rad_ext <- Ra
 
-write.csv(x = meteoro,file = "/home/carlos/Documentos/Quinua SmartApp/et_met.csv")
+write.csv(x = meteoro,file = "C:/Users/Carlos/Documents/Provicional/et_met.csv")
 
 
 ####Camargo 1971 method
