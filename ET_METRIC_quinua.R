@@ -39,9 +39,6 @@ MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/08-Sep-2017/LC08_L1TP_00606
 MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/06-jul-2017/LC08_L1TP_006068_20170706_20170716_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 20-jun
 MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/20-Jun-2017/LC08_L1TP_006068_20170620_20170630_01_T1_MTL.txt"
-
-#####Lectura de MTL landsat 8 || 04-jun
-MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1/LC08_L1TP_006068_20170604_20170616_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 19-may
 MTLfile <- "D:/QuinuaSmartApp/Articulo_ET/Landsat/DN/19-May-2017/LC08_L1TP_006068_20170519_20170525_01_T1_MTL.txt"
 #####Lectura de MTL landsat 8 || 03-may
@@ -74,8 +71,6 @@ imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/13-Dic-2017", sat = "L8",aoi
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/08-Sep-2017", sat = "L8",aoi)
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/06-jul-2017", sat = "L8",aoi)
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/20-Jun-2017", sat = "L8",aoi)
-
-imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/04-Jun-2017/LC08_L1TP_006068_20170604_20170616_01_T1", sat = "L8",aoi)
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/19-May-2017", sat = "L8",aoi)
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/03-May-2017", sat = "L8",aoi)
 imageL8 <- loadImage(path = "Articulo_ET/Landsat/DN/17-Abr-2017", sat = "L8",aoi)
@@ -114,10 +109,6 @@ image.SR <- loadImageSR(
 image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/20-jun-2017",
   aoi=aoi)
-
-image.SR <- loadImageSR(
-  path="Articulo_ET/Landsat/Reflectancia/04-jun-2017/LC080060682017060401T1-SC20181107130021",
-  aoi=aoi)
 image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/19-may-2017",
   aoi=aoi)
@@ -127,6 +118,7 @@ image.SR <- loadImageSR(
 image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/17-Abr-2017",
   aoi=aoi)
+
 image.SR <- loadImageSR(
   path="Articulo_ET/Landsat/Reflectancia/16-Mar-2017",
   aoi=aoi)
@@ -199,7 +191,7 @@ Energy.Balance <- METRIC.EB(image.DN = imageL8,image.SR = image.SR,
                             LAI.method = "metric2010",anchors.method = "flexible", 
                             Z.om.ws = extract(x=mom,y=est[7,]),
                             MTL=MTLfile)
-end_time <- Sys.time()
+ end_time <- Sys.time()
 end_time - start_time
 
 
@@ -221,13 +213,11 @@ writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/13_dic.tif",fo
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/08_sep.tif",format="GTiff",overwrite=TRUE)
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/06_jul.tif",format="GTiff",overwrite=TRUE)
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/20_jun.tif",format="GTiff",overwrite=TRUE)
-
-writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/04_jun.tif",format="GTiff",overwrite=TRUE)
-
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/19_may.tif",format="GTiff",overwrite=TRUE)
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/03_may.tif",format="GTiff",overwrite=TRUE)
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/17_abr.tif",format="GTiff",overwrite=TRUE)
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/16_mar.tif",format="GTiff",overwrite=TRUE)
+
 writeRaster(ET.24$layer,filename = "Articulo_ET/Rasters/ET_METRIC/28_feb.tif",format="GTiff",overwrite=TRUE)
 
 
@@ -244,7 +234,6 @@ et.08.sep <- raster("Articulo_ET/Rasters/ET_METRIC/08_sep.tif")
 
 et.06.jul <- raster("Articulo_ET/Rasters/ET_METRIC/06_jul.tif")
 et.20.jun <- raster("Articulo_ET/Rasters/ET_METRIC/20_jun.tif")
-et.04.jun <- raster("Articulo_ET/Rasters/ET_METRIC/04_jun.tif")
 et.19.may <- raster("Articulo_ET/Rasters/ET_METRIC/19_may.tif")
 et.03.may <- raster("Articulo_ET/Rasters/ET_METRIC/03_may.tif")
 et.17.abr <- raster("Articulo_ET/Rasters/ET_METRIC/17_abr.tif")
