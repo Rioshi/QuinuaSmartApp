@@ -262,5 +262,10 @@ feb.28 <- extract(x=et.28.feb,y=est@coords)
 
 
 todo <- data.frame(nombr,jun.04,ago.07,jul.22,ago.23,oct.26,dic.13,sep.08,jul.06,jun.20,
-                   jun.04,may.19,may.03,abr.17,mar.16,feb.28)
+                   jun.04,may.19,abr.17,mar.16,feb.28)
 write.csv(todo,file="C:/Users/Carlos/Documents/Provicional/met.csv")
+
+
+#DISTANCIA ENTRE ESTACIONES
+
+pointDistance(p1=est[8,], p2=est[2,], lonlat=TRUE)
