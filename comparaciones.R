@@ -120,3 +120,21 @@ cnx <- with(evpt,
                function(x) lm(ETo ~ ETa, data = evpt)))
 sapply(cnx,function(cnx) summary(cnx)$r.squared)
 
+####################
+#COMPROBACION DE LOS SUPUESTOS
+####################
+
+#Normalidad de los errores
+plot(md.1,2) #grafico normal q-q
+nortest::ad.test(resid(md.1))
+
+#Homogeneidad de varianzas
+plot(md.1,3)
+car::ncvTest(md.1)
+
+#Errores correlacionados (independencia)
+car::durbinWatsonTest(md.1)
+plot(md.1,1)
+tt <- broom::augment(md.1)
+plot(x=tt$ETa,y=tt$.resid)
+
