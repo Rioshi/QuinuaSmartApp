@@ -1,5 +1,20 @@
-#Lectura de datos
-meteoro <- read.delim("clipboard",header = TRUE)
+library(googlesheets)
+library(raster)
+library(rasterVis)
+library(spdep)
+library(dplyr)
+library(maptools)
+library(agricolae)
+##################################
+#Lectura de datos con googlesheets
+##################################
+
+gs_auth()
+my_sheets <- gs_ls()
+gap <- gs_title("Meteorologia")
+meteoro <- gap %>%
+  gs_read(ws = "ET_F")
+
 evpt <- meteoro[,c(1:7,12:13)]
 head(evpt)
 evpt <- na.omit(evpt)
@@ -10,12 +25,18 @@ library(moments)
 library(lawstat)
 library(exactRankTests)
 
-#Supuesto 
-skewness(evpt$ETo-evpt$ETa) #asimetria de la diferencia
+#Supuesto de Asimetría
+moments::skewness(evpt$ETo,na.rm=TRUE)
+moments::skewness(evpt$ETa,na.rm=TRUE)
+moments::skewness(evpt$ETo-evpt$ETa,na.rm=TRUE)
+
+
 hist(evpt$ETo-evpt$ETa) #ver la simetria
 # Ho: As = 0
 # Ha: As != 0 
-symmetry.test(evpt$ETo-evpt$ETa,boot=FALSE,option="MGG")
+symmetry.test(na.omit(evpt$ETo),boot=FALSE,option="MGG")
+symmetry.test(na.omit(evpt$ETa),boot=FALSE,option="MGG")
+symmetry.test(na.omit(evpt$ETo-evpt$ETa),boot=FALSE,option="MGG")
 
 #Prueba de Wilcoxon pareada
 # Ho: ETo - Eta >= 0
@@ -23,10 +44,16 @@ symmetry.test(evpt$ETo-evpt$ETa,boot=FALSE,option="MGG")
 
 wilcox.exact(x=evpt$ETo,y=evpt$ETa,paired = TRUE,mu = 0,alternative = "less",exact = TRUE)
 
-
-by(data = evpt,INDICES = evpt[,"estacion"],
-   FUN = function(x) wilcox.exact(x=evpt$ETo,y=evpt$ETa,paired = TRUE,mu = 0,alternative = "less",exact = TRUE))
-
+##RESUMEN ESTADISTICO##
+sd(evpt$ETo,na.rm=TRUE)*100/mean(evpt$ETo,na.rm=TRUE)
+sd(evpt$ETa,na.rm=TRUE)*100/mean(evpt$ETa,na.rm=TRUE)
+sd(evpt$ETo-evpt$ETa,na.rm=TRUE)*100/abs(mean(evpt$ETo-evpt$ETa,na.rm=TRUE))
+max(evpt$ETo,na.rm=TRUE)
+max(evpt$ETa,na.rm=TRUE)
+max(evpt$ETo-evpt$ETa,na.rm=TRUE)
+min(evpt$ETo,na.rm=TRUE)
+min(evpt$ETa,na.rm=TRUE)
+min(evpt$ETo-evpt$ETa,na.rm=TRUE)
 ####################
 #MODELOS DE REGRESION EVAPOTRANSPIRACION - ESTACIONES METEOROLOGICAS
 ####################
