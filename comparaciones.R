@@ -16,8 +16,8 @@ meteoro <- gap %>%
   gs_read(ws = "ET_F")
 
 evpt <- meteoro[,c(1:7,12:13)]
-por <- na.omit(evpt)
-por <- por$ETa*100/por$ETo
+evpt<- na.omit(evpt)
+por <- evpt$ETa*100/evpt$ETo
 mean(por)
 ####################
 #Prueba de Wilcoxon
@@ -73,6 +73,71 @@ ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE)) +
 md.2 <- lm(ETo ~ ETa + Altitud, data=meteoro, na.action = na.omit)
 summary(md.2)
 
+ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE)) + 
+  geom_point(shape=1, na.rm=TRUE) +
+  geom_smooth(method=lm, na.rm=TRUE)
+
+
+####################
+#TRANSFORMACIONES A LA POTENCIA
+####################
+library(alr3)
+boxCox(md.1, lambda = seq(0, 3, by = 0.1))
+
+####################
+#Coeficiente de determinacion por estacion
+####################
+
+md.listo <- nlme::lmList(ETo ~ ETa | estacion, evpt,na.action=na.omit)
+md.listo.resu <- summary(md.listo)
+md.listo.resu$r.squared
+
+####################
+#COMPROBACION DE LOS SUPUESTOS
+####################
+
+##Normalidad de los errores
+plot(md.2,2) #grafico normal q-q
+nortest::ad.test(resid(md.1))
+
+##Homogeneidad de varianzas
+plot(md.2,3)
+car::ncvTest(md.1)
+
+##Errores correlacionados (independencia)
+# Ho: Los errores No están correlacionados
+car::durbinWatsonTest(md.2)
+plot(md.1,1)
+tt <- broom::augment(md.1)
+plot(x=tt$ETa,y=tt$.resid)
+
+#Comprobar si hay autocorrelacion espacial
+evpt.sp <- evpt
+evpt.sp[,"Residuals"] <- resid(md.2)
+coordinates(evpt.sp) <- ~Longitud+Latitud
+crs(evpt.sp) <- "+proj=longlat +ellps=WGS84 +no_defs"
+sw <- knearneigh(evpt.sp, longlat = TRUE)
+sw <- knn2nb(sw,sym = TRUE)
+sw <- nb2listw(sw,zero.policy = TRUE)
+moran.mc(x = evpt.sp$Residuals,listw = sw,nsim=10000,adjust.n=TRUE) #Ho: No hay autocorrelacion
+
+
+
+#Comprobar si hay autocorrelacion temporal
+plot(acf(rstandard(md.1), lag = 40))
+
+
+######REGRESION POR MESES DEL AÑO######
+unique(evpt$date)
+feb <- subset(evpt,date=="28/02/2017")
+mar <- subset(evpt,date=="16/03/2017")
+abr <- subset(evpt,date=="17/04/2017")
+may <- subset(evpt,date=="19/05/2017")
+jun <- subset(evpt,date=="20/06/2017"& date=="04/06/2017")
+jul <- subset(evpt,date=="06/07/2017"& date=="22/07/2017")
+ago <- subset(evpt,date=="07/08/2017"& date=="23/08/2017")
+
+
 ########################################EXTRA##########################################
 #######################################################################################
 #Modelo mas general, cada nivel tiene su propia pendiente e intercepto
@@ -101,39 +166,3 @@ ggplot(augment(md.4), aes(x=ETa, y=ETo, color= estacion)) +
   geom_line(aes(y = .fitted))
 #######################################################################################
 #######################################################################################
-
-
-
-
-####################
-#TRANSFORMACIONES A LA POTENCIA
-####################
-library(alr3)
-boxCox(md.1, lambda = seq(0, 3, by = 0.1))
-
-####################
-#Coeficiente de determinacion por estacion
-####################
-
-md.listo <- nlme::lmList(ETo ~ ETa | estacion, evpt,na.action=na.omit)
-md.listo.resu <- summary(md.listo)
-md.listo.resu$r.squared
-
-####################
-#COMPROBACION DE LOS SUPUESTOS
-####################
-
-#Normalidad de los errores
-plot(md.1,2) #grafico normal q-q
-nortest::ad.test(resid(md.1))
-
-#Homogeneidad de varianzas
-plot(md.1,3)
-car::ncvTest(md.1)
-
-#Errores correlacionados (independencia)
-car::durbinWatsonTest(md.1)
-plot(md.1,1)
-tt <- broom::augment(md.1)
-plot(x=tt$ETa,y=tt$.resid)
-
