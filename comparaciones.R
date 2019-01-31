@@ -70,12 +70,15 @@ ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE)) +
   geom_smooth(method=lm, na.rm=TRUE)
 
 #Agregando la altitud como un factor mas
-md.2 <- lm(ETo ~ ETa + Altitud, data=meteoro, na.action = na.omit)
+md.2 <- lm(ETo ~ ETa + Altitud, data=evpt, na.action = na.omit)
 summary(md.2)
+evpt["fit"] <- fitted(md.2) 
 
-ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE)) + 
+ggplot(evpt, aes(x=fit, y=ETo, na.rm = TRUE,color=date)) + 
   geom_point(shape=1, na.rm=TRUE) +
-  geom_smooth(method=lm, na.rm=TRUE)
+  geom_smooth(method=lm, na.rm=TRUE, aes(group=1)) +
+  xlab("Valores predichos") + ylab("ETo") +
+  theme_light()
 
 
 ####################
@@ -96,13 +99,21 @@ md.listo.resu$r.squared
 #COMPROBACION DE LOS SUPUESTOS
 ####################
 
+##Funcion compiladora
+compilado <- function(x){
+  nor <- nortest::ad.test(resid(x))$p-value
+  hom <- car::ncvTest(x)$p
+  ind <-car::durbinWatsonTest(x)$p-value
+  return(nor,hom,ind)
+}
+
 ##Normalidad de los errores
 plot(md.2,2) #grafico normal q-q
-nortest::ad.test(resid(md.1))
+nortest::ad.test(resid(md.2))
 
 ##Homogeneidad de varianzas
 plot(md.2,3)
-car::ncvTest(md.1)
+car::ncvTest(md.2)
 
 ##Errores correlacionados (independencia)
 # Ho: Los errores No están correlacionados
@@ -136,6 +147,21 @@ may <- subset(evpt,date=="19/05/2017")
 jun <- subset(evpt,date=="20/06/2017"& date=="04/06/2017")
 jul <- subset(evpt,date=="06/07/2017"& date=="22/07/2017")
 ago <- subset(evpt,date=="07/08/2017"& date=="23/08/2017")
+sep <- subset(evpt,date=="08/09/2017")
+oct <- subset(evpt,date=="26/10/2017")
+dic <- subset(evpt,date=="13/12/2017")
+
+#Regresiones por meses
+md.31 <- lm(ETo ~ ETa, data=dic, na.action=na.omit)
+summary(md.31)
+nortest::ad.test(resid(md.31))
+car::ncvTest(md.31)
+car::durbinWatsonTest(md.31)
+md.32 <- lm(ETo ~ ETa + Altitud, data=dic, na.action=na.omit)
+summary(md.32)
+nortest::ad.test(resid(md.32))
+car::ncvTest(md.32)
+car::durbinWatsonTest(md.32)
 
 
 ########################################EXTRA##########################################
