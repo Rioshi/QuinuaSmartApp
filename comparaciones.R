@@ -15,7 +15,7 @@ gap <- gs_title("Meteorologia")
 meteoro <- gap %>%
   gs_read(ws = "ET_F")
 
-evpt <- meteoro[,c(1:7,12:13)]
+evpt <- meteoro[,c(1:8,13:14)]
 evpt<- na.omit(evpt)
 por <- evpt$ETa*100/evpt$ETo
 mean(por)
@@ -60,27 +60,41 @@ min(evpt$ETo-evpt$ETa,na.rm=TRUE)
 #MODELOS DE REGRESION EVAPOTRANSPIRACION - ESTACIONES METEOROLOGICAS
 ####################
 library(ggplot2)
+library(gridExtra)
+library(ggpubr)
 
 #Lineas de regresion coincidentes (el comun)
 md.1 <- lm(ETo ~ ETa, data=meteoro, na.action=na.omit)
 summary(md.1)
+sqrt(mean(md.1$residuals^2))
 
-ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE)) + 
-  geom_point(shape=1, na.rm=TRUE) +
-  geom_smooth(method=lm, na.rm=TRUE)
+g1 <- ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE,color=MES)) + 
+  geom_point(shape=20, na.rm=TRUE) +
+  geom_smooth(method=lm, na.rm=TRUE, aes(group=1)) +
+  theme_light() +
+  theme(axis.text=element_text(size=10),
+        axis.title.x = element_text(face="bold"),
+        axis.title.y = element_text(face="bold"))
 
 #Agregando la altitud como un factor mas
 md.2 <- lm(ETo ~ ETa + Altitud, data=evpt, na.action = na.omit)
 summary(md.2)
+sqrt(mean(md.2$residuals^2))
 evpt["fit"] <- fitted(md.2) 
 
-ggplot(evpt, aes(x=fit, y=ETo, na.rm = TRUE,color=date)) + 
-  geom_point(shape=1, na.rm=TRUE) +
+g2 <- ggplot(evpt, aes(x=ETo, y=fit, na.rm = TRUE,color=MES)) + 
+  geom_point(shape=20, na.rm=TRUE) +
   geom_smooth(method=lm, na.rm=TRUE, aes(group=1)) +
   xlab("Valores predichos") + ylab("ETo") +
-  theme_light()
+  theme_light()+
+  theme(axis.text=element_text(size=10),
+        axis.title.x = element_text(face="bold"),
+        axis.title.y = element_text(face="bold"))
 
 
+png("E:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/comparaciones1.png", width = 15, height = 10, units = 'cm', res = 300)
+ggarrange(g1,g2, ncol=2, common.legend = TRUE, legend="bottom")
+dev.off()
 ####################
 #TRANSFORMACIONES A LA POTENCIA
 ####################
@@ -144,9 +158,9 @@ feb <- subset(evpt,date=="28/02/2017")
 mar <- subset(evpt,date=="16/03/2017")
 abr <- subset(evpt,date=="17/04/2017")
 may <- subset(evpt,date=="19/05/2017")
-jun <- subset(evpt,date=="20/06/2017"& date=="04/06/2017")
-jul <- subset(evpt,date=="06/07/2017"& date=="22/07/2017")
-ago <- subset(evpt,date=="07/08/2017"& date=="23/08/2017")
+jun <- subset(evpt,date=="20/06/2017" | date=="04/06/2017")
+jul <- subset(evpt,date=="06/07/2017" | date=="22/07/2017")
+ago <- subset(evpt,date=="07/08/2017" | date=="23/08/2017")
 sep <- subset(evpt,date=="08/09/2017")
 oct <- subset(evpt,date=="26/10/2017")
 dic <- subset(evpt,date=="13/12/2017")
@@ -154,11 +168,14 @@ dic <- subset(evpt,date=="13/12/2017")
 #Regresiones por meses
 md.31 <- lm(ETo ~ ETa, data=dic, na.action=na.omit)
 summary(md.31)
+sqrt(mean(md.31$residuals^2))
 nortest::ad.test(resid(md.31))
 car::ncvTest(md.31)
 car::durbinWatsonTest(md.31)
+
 md.32 <- lm(ETo ~ ETa + Altitud, data=dic, na.action=na.omit)
 summary(md.32)
+sqrt(mean(md.32$residuals^2))
 nortest::ad.test(resid(md.32))
 car::ncvTest(md.32)
 car::durbinWatsonTest(md.32)
