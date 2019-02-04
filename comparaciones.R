@@ -181,6 +181,37 @@ car::ncvTest(md.32)
 car::durbinWatsonTest(md.32)
 
 
+####################
+#COMPARACIONES MESES METRIC
+####################
+est <- gap %>%
+  gs_read
+coordinates(est) = ~X+Y
+proj4string(est) <- CRS("+proj=utm +zone=18 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+est <- spTransform(est, crs(metric))
+
+library(rasterVis)
+startdir <- getwd()
+setwd("E:/QuinuaSmartApp/Articulo_ET/Rasters/ET_METRIC")
+files <- list.files(pattern="tif$")
+files
+stack1 <- list()
+for(i in 1:length(files)) {
+  stack1[[i]] <- raster(files[i])}
+stack1
+metric <- do.call(stack, stack1) ### JO!
+setwd(startdir)
+rm(startdir,files,stack1)
+metric
+nam <- c("4-jun","06-jul","07-ago","08-sep","13-dic","16-mar","17-abr","19-may","20-jun",
+                   "22-jul","23-ago","26-oct","28-feb")
+
+png("E:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/comparaciones2.png", width = 15, height = 10, units = 'cm', res = 400)
+levelplot(metric,margin=FALSE,par.settings = viridisTheme, scales=list(draw=FALSE),names.attr=nam)  +
+  layer(sp.points(est,pch=20,cex=1.5,col="black"))
+dev.off()
+
+
 ########################################EXTRA##########################################
 #######################################################################################
 #Modelo mas general, cada nivel tiene su propia pendiente e intercepto
