@@ -74,7 +74,9 @@ g1 <- ggplot(meteoro, aes(x=ETa, y=ETo, na.rm = TRUE,color=MES)) +
   theme_light() +
   theme(axis.text=element_text(size=10),
         axis.title.x = element_text(face="bold"),
-        axis.title.y = element_text(face="bold"))
+        axis.title.y = element_text(face="bold"))+
+  xlab(expression(bold(paste('ETa (mm.día'^"-1"*')'))))+
+  ylab(expression(bold(paste('ETo (mm.día'^"-1"*')'))))
 
 #Agregando la altitud como un factor mas
 md.2 <- lm(ETo ~ ETa + Altitud, data=evpt, na.action = na.omit)
@@ -85,14 +87,15 @@ evpt["fit"] <- fitted(md.2)
 g2 <- ggplot(evpt, aes(x=ETo, y=fit, na.rm = TRUE,color=MES)) + 
   geom_point(shape=20, na.rm=TRUE) +
   geom_smooth(method=lm, na.rm=TRUE, aes(group=1)) +
-  xlab("Valores predichos") + ylab("ETo") +
   theme_light()+
   theme(axis.text=element_text(size=10),
         axis.title.x = element_text(face="bold"),
-        axis.title.y = element_text(face="bold"))
+        axis.title.y = element_text(face="bold"))+
+  xlab(expression(bold(paste('ETa (mm.día'^"-1"*')'))))+
+  ylab(expression(bold(paste('Valores predichos (mm.día'^"-1"*')'))))
 
 
-png("E:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/comparaciones1.png", width = 15, height = 10, units = 'cm', res = 300)
+png("G:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/comparaciones1.png", width = 15, height = 10, units = 'cm', res = 300)
 ggarrange(g1,g2, ncol=2, common.legend = TRUE, legend="bottom")
 dev.off()
 ####################
@@ -149,7 +152,7 @@ moran.mc(x = evpt.sp$Residuals,listw = sw,nsim=10000,adjust.n=TRUE) #Ho: No hay 
 
 
 #Comprobar si hay autocorrelacion temporal
-plot(acf(rstandard(md.1), lag = 40))
+plot(acf(rstandard(md.2), lag = 40))
 
 
 ######REGRESION POR MESES DEL AÑO######
