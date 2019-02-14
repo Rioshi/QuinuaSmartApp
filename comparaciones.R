@@ -14,6 +14,7 @@ my_sheets <- gs_ls()
 gap <- gs_title("Meteorologia")
 meteoro <- gap %>%
   gs_read(ws = "ET_F")
+meteoro <- as.data.frame.data.frame(meteoro)
 
 evpt <- meteoro[,c(1:8,13:14)]
 evpt<- na.omit(evpt)
@@ -250,3 +251,25 @@ ggplot(augment(md.4), aes(x=ETa, y=ETo, color= estacion)) +
   geom_line(aes(y = .fitted))
 #######################################################################################
 #######################################################################################
+
+####################
+#SERIES DE TIEMPO
+####################
+library("lubridate")
+meteoro$date <- as.Date(meteoro$date,format='%d/%m/%Y')
+meteoro[,"DOY"] <- yday(meteoro$date) 
+
+ggplot(meteoro, aes(x=DOY, y=ETo,na.rm=TRUE)) +
+  #scale_x_date(limits=c(as.Date("01/01/2017"),as.Date("31/12/2017"))) +
+  geom_point(na.rm=TRUE) +
+  geom_line()
+
+timEto <- ts(na.omit(meteoro$ETo),start=2,end=12)
+timEto
+plot.ts(timEto)
+
+timeEta <- ts(na.omit(meteoro$ETa),start=2,end=12)
+timeEta
+plot.ts(timeEta)
+
+eto <- meteoro[,c(2:8,13)]
