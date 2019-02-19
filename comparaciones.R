@@ -264,12 +264,44 @@ ggplot(meteoro, aes(x=DOY, y=ETo,na.rm=TRUE)) +
   geom_point(na.rm=TRUE) +
   geom_line()
 
+#Objetos de clase serie de tiempo#
 timEto <- ts(na.omit(meteoro$ETo),start=2,end=12)
 timEto
 plot.ts(timEto)
+abline(reg=lm(timEto~time(timEto)))
+
 
 timeEta <- ts(na.omit(meteoro$ETa),start=2,end=12)
 timeEta
 plot.ts(timeEta)
+abline(reg=lm(timeEta~time(timeEta)))
 
-eto <- meteoro[,c(2:8,13)]
+#Boxplot por meses
+unique(meteoro$MES)
+meteoro$MES<-ordered(meteoro$MES,levels=c("Feb","Mar","Abr","May","Jun","Jul",
+                             "Ago","Sep","Oct","Dic"))
+boxplot(ETo~MES,data=meteoro)
+
+ggplot(meteoro,aes(x=MES,y=ETo,na.rm=TRUE)) + 
+  geom_boxplot()
+
+#Crear un conjunto de datos dual
+a1 <- meteoro[,c(6,13)]
+a1[,"tt"] <- rep("ETo",length(a1))
+names(a1) <- c("MES","Evp","Tipo")
+a2 <- meteoro[,c(6,14)]
+a2[,"tt"] <- rep("ETa",length(a2))
+names(a2) <- c("MES","Evp","Tipo")
+a3 <- rbind(a1,a2) #para unir uno bajo otro rbind(a1,a2) horizontal cbind(a1,a2)
+rm(a1,a2)
+
+png("G:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/boxplotemporal.png", width = 15, height = 10, units = 'cm', res = 400)
+ggplot(a3,aes(x=MES,y=Evp,fill=Tipo,na.rm=TRUE)) + 
+  geom_boxplot() +
+  theme_light() +
+  theme(axis.text=element_text(size=10),
+        axis.title.x = element_text(face="bold"),
+        axis.title.y = element_text(face="bold"))+
+  ylab(expression(bold(paste('Evapotranspiración (mm.día'^"-1"*')'))))+ xlab("")+
+  guides(fill=guide_legend(title=NULL))
+dev.off()
