@@ -305,3 +305,32 @@ ggplot(a3,aes(x=MES,y=Evp,fill=Tipo,na.rm=TRUE)) +
   ylab(expression(bold(paste('Evapotranspiración (mm.día'^"-1"*')'))))+ xlab("")+
   guides(fill=guide_legend(title=NULL))
 dev.off()
+
+#Crear serie de tiempo
+library(reshape2)
+library(zoo)
+ms <- c("Feb","Mar","Abr","May","Jun","Jul",
+        "Ago","Sep","Oct","Nov","Dic")
+df1 <- data.frame(date=ms,Y=as.matrix(timEto))
+df1[,"ET"] <- rep("ETo",nrow(df1))
+names(df1) <- c("MES","Evp","Tipo")
+df1$MES <-ordered(df1$MES,levels=c("Feb","Mar","Abr","May","Jun","Jul",
+                                       "Ago","Sep","Oct","Nov","Dic")) 
+df2 <- data.frame(date=ms,Y=as.matrix(timeEta))
+df2[,"ET"] <- rep("ETa",nrow(df2))
+names(df2) <- c("MES","Evp","Tipo")
+df2$MES <-ordered(df2$MES,levels=c("Feb","Mar","Abr","May","Jun","Jul",
+                                   "Ago","Sep","Oct","Nov","Dic")) 
+df <- rbind(df1,df2)
+rm(df1,df2,ms)
+
+png("G:/QuinuaSmartApp/Articulo_ET/Imagenes_Resultados/timeserie.png", width = 15, height = 10, units = 'cm', res = 400)
+ggplot(data=df,aes(x=MES,y=Evp,group=Tipo))+
+  geom_line(aes(color=Tipo), size=1.2) +
+  theme_light() +
+  theme(axis.text=element_text(size=10),
+        axis.title.x = element_text(face="bold"),
+        axis.title.y = element_text(face="bold"),
+        legend.title=element_blank())+
+  ylab(expression(bold(paste('Evapotranspiración (mm.día'^"-1"*')'))))+ xlab("")
+dev.off()
