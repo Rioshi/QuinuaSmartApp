@@ -14,7 +14,7 @@ my_sheets <- gs_ls()
 gap <- gs_title("Meteorologia")
 meteoro <- gap %>%
   gs_read(ws = "ET_F")
-meteoro <- as.data.frame.data.frame(meteoro)
+meteoro <- as.data.frame(meteoro)
 
 evpt <- meteoro[,c(1:8,13:14)]
 evpt<- na.omit(evpt)
