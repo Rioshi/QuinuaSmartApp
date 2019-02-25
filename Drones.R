@@ -73,14 +73,15 @@ par(mfrow=c(1,2))
 #########################
 library(dplyr)
 library(readr)
-setwd("H:/QuinuaSmartApp/Drone/Lidar/220418_Jauja/pcap_8_11")
+setwd("D:/QuinuaSmartApp/Drone/Lidar/220418_Jauja/pcap_8_11")
 df <- list.files(full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
 df<- as.data.frame(df)
+df<- df[,c(4:6)]
 df.sp <- df
 #Crear el objeto espacial
 coordinates(df.sp)<-~X+Y
 
 #Crear un raster del objeto espacial
-lidar.ras <- rasterFromXYZ(df, res=c(10,10))
+lidar.ras <- rasterFromXYZ(df)
