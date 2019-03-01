@@ -73,15 +73,32 @@ par(mfrow=c(1,2))
 #########################
 library(dplyr)
 library(readr)
-setwd("D:/QuinuaSmartApp/Drone/Lidar/220418_Jauja/pcap_8_11")
+setwd("G:/QuinuaSmartApp/Drone/Lidar/220418_Jauja/pcap_8_11")
 df <- list.files(full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
 df<- as.data.frame(df)
 df<- df[,c(4:6)]
-df.sp <- df
+
+#Ajustar la orientacion del lidar
+z.angle <- rep(-pi/3 -0.115,nrow(df))
+x.angle <- rep(-pi/2,nrow(df))
+y.angle <- rep(-pi/2,nrow(df))
+df$X <- df$X*x.angle
+df$Y <- df$Y*y.angle
+df$Z <- df$Z*z.angle
+
 #Crear el objeto espacial
+df.sp <- df
 coordinates(df.sp)<-~X+Y
 
 #Crear un raster del objeto espacial
-lidar.ras <- rasterFromXYZ(df)
+lidar.ras <- rasterFromXYZ(df,digits = 0.01,res=c(0.01,0.01))
+
+#plotear raster
+library(rasterVis)
+rasterVis::levelplot(lidar.ras, layers = 1, contour=TRUE,
+                     par.settings = magmaTheme, xlim=c(-50,50),ylim=c(-50,50))
+
+#Analisis exploratorio de los datos
+hist(df$Z,main="LIDAR",ylab="Frecuencia",xlab="Eje Z (m)",col="lightblue",cex.lab=2.5,cex.main=2.5,cex.axis=2.5)
